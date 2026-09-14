@@ -103,8 +103,8 @@ module Core_Params(
                 cfg_has_accelerator  = 1'b0;
             end
             2'd1: begin // Mainstream node
-                cfg_pipeline_stages  = 32'd5;
-                cfg_issue_width      = 32'd1;
+                cfg_pipeline_stages  = 32'd6;
+                cfg_issue_width      = 32'd2;
                 cfg_has_icache       = 1'b1;
                 cfg_has_dcache       = 1'b1;
                 cfg_has_predictor    = 1'b1;
@@ -123,8 +123,8 @@ module Core_Params(
                 cfg_has_accelerator  = 1'b1;
             end
             default: begin
-                cfg_pipeline_stages  = 32'd5;
-                cfg_issue_width      = 32'd1;
+                cfg_pipeline_stages  = 32'd6;
+                cfg_issue_width      = 32'd2;
                 cfg_has_icache       = 1'b1;
                 cfg_has_dcache       = 1'b1;
                 cfg_has_predictor    = 1'b1;

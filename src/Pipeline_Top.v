@@ -35,20 +35,29 @@ module Pipeline_Top(
     input  wire             clk,
     input  wire             rst,
 
+    // Accelerator command interface (CPU custom instructions / MMIO)
+    input  wire             acc_cmd_valid,
+    input  wire [31:0]      acc_cmd_in,
+    input  wire [31:0]      acc_a0_in,
+    input  wire [31:0]      acc_a1_in,
+    output wire             acc_result_valid,
+    output wire [31:0]      acc_result,
+
     // Accelerator dispatch interface (CPU -> accelerators)
     output wire             acc_valid,
     output wire [31:0]      acc_cmd,
     output wire [31:0]      acc_a0,
     output wire [31:0]      acc_a1,
     input  wire             acc_ready,
-    input  wire [31:0]      acc_result,
 
     // Node profile select: 0=legacy, 1=mainstream, 2=modern
     input  wire [1:0]       profile_sel,
 
     // Performance counters exposed for the estimation model
     output wire [31:0]      perf_branch_mispredict,
-    output wire [31:0]      perf_acc_commands
+    output wire [31:0]      perf_acc_commands,
+    output wire [31:0]      perf_gpu_ops,
+    output wire [31:0]      perf_npu_ops
 );
 
     // -----------------------------------------------------------------------
@@ -407,21 +416,32 @@ module Pipeline_Top(
     // -----------------------------------------------------------------------
     //  Accelerator dispatch
     // -----------------------------------------------------------------------
+    //  Accelerator dispatch
+    //  External command interface (CPU custom instructions / MMIO, or a
+    //  testbench in simulation) pushes commands; results return through
+    //  acc_result_valid / acc_result.
+    // -----------------------------------------------------------------------
+    wire        acc_result_valid_i;
+    wire [31:0] acc_result_data;
+
     Accelerator_Dispatch acc (
         .clk(clk),
         .rst(rst),
         .enable(p_has_accelerator),
-        .cmd_valid(1'b0),
+        .cmd_valid(acc_cmd_valid),
         .cmd_ready(acc_ready),
-        .cmd_in(32'd0),
-        .a0_in(32'd0),
-        .a1_in(32'd0),
-        .result_in(acc_result),
-        .out_valid(acc_valid),
-        .out_cmd(acc_cmd),
-        .out_a0(acc_a0),
-        .out_a1(acc_a1),
-        .perf_acc_commands(perf_acc_commands)
+        .cmd_in(acc_cmd_in),
+        .a0_in(acc_a0_in),
+        .a1_in(acc_a1_in),
+        .result_valid(acc_result_valid_i),
+        .result_data(acc_result_data),
+        .perf_acc_commands(perf_acc_commands),
+        .perf_gpu_ops(perf_gpu_ops),
+        .perf_npu_ops(perf_npu_ops)
     );
+
+    assign acc_valid = p_has_accelerator && acc_ready; // consumed on accept
+    assign acc_result = acc_result_data;
+    assign acc_result_valid = acc_result_valid_i;
 
 endmodule

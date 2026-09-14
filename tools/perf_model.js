@@ -50,7 +50,7 @@ const CORE_CONFIGS = {
     issue_width: 1,
     pipeline_stages: 5,
     icache_kb: 4, dcache_kb: 4,
-    predictor: '2-bit saturating + BTB (32 entry)',
+    predictor: 'Bimodal (64 entry) + BTB (16)',
     accel_gpu: true, accel_npu: false,
     base_ipc: 0.85,
   },
@@ -65,7 +65,7 @@ const CORE_CONFIGS = {
   },
   modern_5nm: {
     name: 'RVX-4 Performance',
-    issue_width: 4,
+    issue_width: 2,
     pipeline_stages: 7,
     icache_kb: 64, dcache_kb: 64,
     predictor: 'TAGE-lite (4K) + BTB (1K) + RAS(16)',

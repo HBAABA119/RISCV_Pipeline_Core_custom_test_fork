@@ -19,17 +19,29 @@
 // ============================================================================
 //  Branch_Predictor
 //
-//  Branch prediction unit for the parameterized core.
+//  Branch prediction unit for the parameterized core family.
+//
+//  Prediction modes (parameterized to match node profiles):
+//    MODE_BIMODAL = 0 : 2-bit saturating counters + BTB (legacy profile)
+//    MODE_GSHARE  = 1 : global-history-indexed 2-bit counters + BTB + RAS
+//                       (mainstream profile)
+//    MODE_TAGE_LITE = 2 : gshare core + longer history + larger tables +
+//                         deeper RAS (modern profile)
 //
 //  Features:
-//    - 2-bit saturating counter predictor table
-//    - Branch target buffer (BTB) for target caching
-//    - Return-address stack for call/return prediction
+//    - Branch target buffer (BTB) with configurable entries
+//    - Return address stack (RAS) with configurable depth
+//    - Global history register folded into the prediction index (gshare)
 //    - Mispredict tracking for the performance model
 //    - Enable/disable via configuration
 // ============================================================================
 
-module Branch_Predictor(
+module Branch_Predictor #(
+    parameter PRED_MODE    = 1,    // 0=bimodal, 1=gshare, 2=tage-lite
+    parameter BTB_ENTRIES  = 128,
+    parameter RAS_DEPTH    = 8,
+    parameter HIST_BITS    = 10
+)(
     input  wire              clk,
     input  wire              rst,
 
@@ -38,6 +50,8 @@ module Branch_Predictor(
     // From fetch stage
     input  wire [31:0]       fetch_pc,
     input  wire [31:0]       fetch_instr,
+    input  wire              fetch_is_call,   // JAL with rd=x1 (call)
+    input  wire              fetch_is_ret,    // JALR with rs1=x1 (return)
     output wire              predict_taken,
     output wire [31:0]       predict_target,
 
@@ -53,76 +67,98 @@ module Branch_Predictor(
 );
 
     // -----------------------------------------------------------------------
-    //  Predictor configuration
+    //  Derived geometry from mode
     // -----------------------------------------------------------------------
-    localparam BTB_ENTRIES     = 16;
-    localparam BTB_INDEX_BITS = 4;
-    localparam RAS_SIZE       = 8;
+    localparam MODE_BIMODAL   = 0;
+    localparam MODE_GSHARE    = 1;
+    localparam MODE_TAGE_LITE = 2;
+
+    // Table sizes scale with prediction capability
+    localparam PRED_TABLE_ENTRIES = (PRED_MODE == MODE_TAGE_LITE) ? 4096 :
+                                    (PRED_MODE == MODE_GSHARE)    ? 512  :
+                                                                    64;
+    localparam IDX_BITS = (PRED_TABLE_ENTRIES == 4096) ? 12 :
+                          (PRED_TABLE_ENTRIES == 512)  ? 9  : 6;
+    localparam BTB_INDEX_BITS = $clog2(BTB_ENTRIES);
+
+    // Effective history length: gshare uses HIST_BITS, tage-lite doubles it
+    localparam EFF_HIST_BITS = (PRED_MODE == MODE_TAGE_LITE) ? (HIST_BITS * 2) :
+                               (PRED_MODE == MODE_GSHARE)    ? HIST_BITS       : 1;
 
     localparam PRED_COUNTER_BITS = 2;
     localparam PRED_STRONG_NOT_TAKEN = 2'b00;
-    localparam PRED_WEAK_NOT_TAKEN  = 2'b01;
-    localparam PRED_WEAK_TAKEN     = 2'b10;
+    localparam PRED_WEAK_NOT_TAKEN   = 2'b01;
+    localparam PRED_WEAK_TAKEN       = 2'b10;
     localparam PRED_STRONG_TAKEN     = 2'b11;
 
     // -----------------------------------------------------------------------
-    //  BTB / predictor tables
+    //  Tables
     // -----------------------------------------------------------------------
     reg [31:0] btb_target [BTB_ENTRIES-1:0];
-    reg [PRED_COUNTER_BITS-1:0] btb_pred [BTB_ENTRIES-1:0];
-    reg        btb_valid [BTB_ENTRIES-1:0];
+    reg        btb_valid  [BTB_ENTRIES-1:0];
+    reg [PRED_COUNTER_BITS-1:0] pred_table [PRED_TABLE_ENTRIES-1:0];
 
-    reg [31:0] ras [RAS_SIZE-1:0];
-    reg [3:0]  ras_ptr;
-
+    reg [EFF_HIST_BITS-1:0] global_history;
+    reg [31:0] ras [RAS_DEPTH-1:0];
+    reg [$clog2(RAS_DEPTH)-1:0] ras_ptr;
     reg [31:0] perf_mispredict_reg;
 
-    // -----------------------------------------------------------------------
-    //  Index / tag from PC
-    // -----------------------------------------------------------------------
-    wire [BTB_INDEX_BITS-1:0] btb_index;
-    wire [31:0] btb_tag;
+    integer i;
 
-    assign btb_index = fetch_pc[BTB_INDEX_BITS+1:2];
-    assign btb_tag   = fetch_pc[31:BTB_INDEX_BITS+2];
+    // -----------------------------------------------------------------------
+    //  Prediction indexing
+    // -----------------------------------------------------------------------
+    wire [BTB_INDEX_BITS-1:0] btb_index = fetch_pc[BTB_INDEX_BITS+1:2];
+
+    // Fold the global history into the PC for the gshare/TAGE index
+    wire [IDX_BITS-1:0] pc_folded  = fetch_pc[IDX_BITS+1:2];
+    wire [IDX_BITS-1:0] hist_folded;
+    wire [IDX_BITS-1:0] pred_index;
+
+    generate
+        if (EFF_HIST_BITS <= IDX_BITS) begin : FOLD_NARROW
+            assign hist_folded = {{(IDX_BITS-EFF_HIST_BITS){1'b0}}, global_history}
+                                 ^ pc_folded;
+        end else begin : FOLD_WIDE
+            // XOR-fold the wider history down to the index width
+            reg [IDX_BITS-1:0] folded;
+            integer b;
+            always @(*) begin
+                folded = {IDX_BITS{1'b0}};
+                for (b = 0; b < EFF_HIST_BITS; b = b + 1) begin
+                    folded[b % IDX_BITS] = folded[b % IDX_BITS] ^ global_history[b];
+                end
+            end
+            assign hist_folded = folded ^ pc_folded;
+        end
+    endgenerate
+
+    assign pred_index = (PRED_MODE == MODE_BIMODAL) ? pc_folded : hist_folded;
 
     // -----------------------------------------------------------------------
     //  Prediction
     // -----------------------------------------------------------------------
-    wire [31:0] btb_entry_target;
-    wire [PRED_COUNTER_BITS-1:0] btb_entry_pred;
-    wire        btb_entry_valid;
+    wire btb_entry_valid = btb_valid[btb_index];
+    wire [31:0] btb_entry_target = btb_target[btb_index];
+    wire [PRED_COUNTER_BITS-1:0] pred_counter = pred_table[pred_index];
 
-    assign btb_entry_target = btb_target[btb_index];
-    assign btb_entry_pred   = btb_pred[btb_index];
-    assign btb_entry_valid  = btb_valid[btb_index];
+    wire pred_taken_raw = btb_entry_valid &&
+        (pred_counter == PRED_WEAK_TAKEN || pred_counter == PRED_STRONG_TAKEN);
 
-    // Predict taken if strong or weak taken
-    wire pred_taken_raw;
+    wire [31:0] predict_target_raw = btb_entry_valid ? btb_entry_target
+                                                     : (fetch_pc + 32'd4);
 
-    assign pred_taken_raw = (btb_entry_valid && (btb_entry_pred == PRED_WEAK_TAKEN || btb_entry_pred == PRED_STRONG_TAKEN));
+    // RAS-based return prediction takes priority for returns
+    wire ras_predict = enable && fetch_is_ret && (ras_ptr > 0);
 
-    // Predict target is either BTB target or PC+4
-    wire [31:0] predict_target_raw;
-
-    assign predict_target_raw = btb_entry_valid ? btb_entry_target : (fetch_pc + 32'd4);
-
-    // -----------------------------------------------------------------------
-    //  Final prediction outputs
-    // -----------------------------------------------------------------------
-    assign predict_taken = enable ? pred_taken_raw : 1'b0;
-    assign predict_target = enable ? predict_target_raw : 32'd4;
+    assign predict_taken  = enable ? (ras_predict || pred_taken_raw) : 1'b0;
+    assign predict_target = enable ?
+        (ras_predict ? ras[ras_ptr - 1] : predict_target_raw) : 32'd4;
 
     // -----------------------------------------------------------------------
     //  Mispredict detection
     // -----------------------------------------------------------------------
-    // A mispredict occurs when:
-    //   - We predicted taken but branch was not taken
-    //   - We predicted not taken but branch was taken
-    //   - Predicted target differs from actual target
-    wire mispredict_raw;
-
-    assign mispredict_raw = enable ?
+    wire mispredict_raw = enable ?
         ( (predict_taken && !branch_taken) ||
           (!predict_taken && branch_taken) ||
           (predict_taken && branch_taken && (predict_target != branch_target)) ) : 1'b0;
@@ -130,55 +166,82 @@ module Branch_Predictor(
     assign mispredict = mispredict_raw;
 
     // -----------------------------------------------------------------------
-    //  BTB / predictor update on mispredict or correct prediction
+    //  Update on branch resolution
     // -----------------------------------------------------------------------
-    wire [BTB_INDEX_BITS-1:0] update_index;
-    wire [31:0] update_target;
-    wire [PRED_COUNTER_BITS-1:0] update_pred;
+    wire [BTB_INDEX_BITS-1:0] update_index = branch_addr[BTB_INDEX_BITS+1:2];
+    wire [IDX_BITS-1:0] update_pc_folded = branch_addr[IDX_BITS+1:2];
+    wire [IDX_BITS-1:0] update_hist_folded;
+    wire [IDX_BITS-1:0] update_pred_index;
 
-    assign update_index = branch_addr[BTB_INDEX_BITS+1:2];
-    assign update_target = branch_target;
+    generate
+        if (EFF_HIST_BITS <= IDX_BITS) begin : UFOLD_NARROW
+            assign update_hist_folded =
+                {{(IDX_BITS-EFF_HIST_BITS){1'b0}}, global_history} ^ update_pc_folded;
+        end else begin : UFOLD_WIDE
+            reg [IDX_BITS-1:0] ufolded;
+            integer ub;
+            always @(*) begin
+                ufolded = {IDX_BITS{1'b0}};
+                for (ub = 0; ub < EFF_HIST_BITS; ub = ub + 1) begin
+                    ufolded[ub % IDX_BITS] = ufolded[ub % IDX_BITS] ^ global_history[ub];
+                end
+            end
+            assign update_hist_folded = ufolded ^ update_pc_folded;
+        end
+    endgenerate
 
-    // Update predictor state on branch resolution
+    assign update_pred_index = (PRED_MODE == MODE_BIMODAL) ? update_pc_folded
+                                                           : update_hist_folded;
+
+    // Update the history register: shift in the resolved direction.
+    // NOTE: for accuracy this should happen at decode-time in program order;
+    // updating at resolve is an approximation acceptable for the model.
+    wire hist_shift = enable && (branch_instr[6:0] == OP_BRANCH);
+
     always @(posedge clk or negedge rst) begin
         if (!rst) begin
+            global_history <= {EFF_HIST_BITS{1'b0}};
+            ras_ptr <= {$clog2(RAS_DEPTH){1'b0}};
             perf_mispredict_reg <= 32'd0;
-            ras_ptr <= 4'd0;
-        end else if (enable && branch_addr != 32'd0) begin
-            // Update BTB entry
-            if (branch_taken) begin
-                btb_target[update_index] <= update_target;
-                btb_valid[update_index]  <= 1'b1;
+            for (i = 0; i < PRED_TABLE_ENTRIES; i = i + 1)
+                pred_table[i] <= PRED_WEAK_TAKEN;
+        end else begin
+            // Update prediction counter
+            if (enable && branch_addr != 32'd0 &&
+                (branch_instr[6:0] == OP_BRANCH ||
+                 branch_instr[6:0] == OP_JAL ||
+                 branch_instr[6:0] == OP_JALR)) begin
+                if (branch_taken) begin
+                    btb_target[update_index] <= branch_target;
+                    btb_valid[update_index]  <= 1'b1;
+                    if (pred_table[update_pred_index] != PRED_STRONG_TAKEN)
+                        pred_table[update_pred_index] <= pred_table[update_pred_index] + 1'd1;
+                end else begin
+                    if (pred_table[update_pred_index] != PRED_STRONG_NOT_TAKEN)
+                        pred_table[update_pred_index] <= pred_table[update_pred_index] - 1'd1;
+                end
 
-                // Update 2-bit counter: taken -> increment
-                if (btb_pred[update_index] != PRED_STRONG_TAKEN) begin
-                    btb_pred[update_index] <= btb_pred[update_index] + 1'd1;
-                end
-            end else begin
-                // Update 2-bit counter: not taken -> decrement
-                if (btb_pred[update_index] != PRED_STRONG_NOT_TAKEN) begin
-                    btb_pred[update_index] <= btb_pred[update_index] - 1'd1;
-                end
+                if (mispredict_raw)
+                    perf_mispredict_reg <= perf_mispredict_reg + 1'd1;
             end
 
-            // Track mispredicts
-            if (mispredict_raw) begin
-                perf_mispredict_reg <= perf_mispredict_reg + 1'd1;
+            // History register update
+            if (hist_shift) begin
+                global_history <= {global_history[EFF_HIST_BITS-2:0], branch_taken};
             end
 
-            // Return-address stack management
-            // On call (jal with rd == x1 or jalr to link), push return address
-            // On return (jalr from link), pop
-            if (branch_instr[6:0] == 7'b1100111) begin // JALR
-                // Return: pop
-                if (ras_ptr > 0) begin
-                    ras_ptr <= ras_ptr - 1'd1;
-                end
-            end else if (branch_instr[6:0] == 7'b1101111) begin // JAL
-                // Call: push PC+4
-                if (ras_ptr < RAS_SIZE-1) begin
-                    ras[ras_ptr] <= branch_addr + 32'd4;
-                    ras_ptr <= ras_ptr + 1'd1;
+            // Return address stack: push on call (JAL w/ link), pop on return
+            if (enable && branch_addr != 32'd0) begin
+                if (branch_instr[6:0] == OP_JALR) begin
+                    // Return: pop (predicted via RAS at fetch)
+                    if (ras_ptr > 0)
+                        ras_ptr <= ras_ptr - 1'd1;
+                end else if (branch_instr[6:0] == OP_JAL) begin
+                    // Call: push return address
+                    if (ras_ptr < RAS_DEPTH-1) begin
+                        ras[ras_ptr] <= branch_addr + 32'd4;
+                        ras_ptr <= ras_ptr + 1'd1;
+                    end
                 end
             end
         end

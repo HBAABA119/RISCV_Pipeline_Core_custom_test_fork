@@ -1,7 +1,13 @@
 @00000000
-00500293
-00300313
-006283B3
-00002403
-00100493
-00940533
+// Accelerator dispatch + branch/jump exercise program (RV32I base subset).
+// Loop exercises the gshare predictor + RAS via beq/jal; load/store verifies
+// the LSU. Accelerator commands are driven by the testbench through the
+// top-level acc_* interface to validate the GPU/NPU command path.
+00000093 // addi x1, x0, 0
+00500113 // addi x2, x0, 5      # loop limit
+00000193 // addi x3, x0, 0      # counter
+00118193 // addi x3, x3, 1      # loop body (0x0C)
+00218463 // beq  x3, x2, +8     # exit when done (0x10)
+FFDFF06F // jal  x0, -8         # back to loop body (0x14)
+00302023 // sw   x3, 0(x0)      # done: store counter (0x18)
+00002E03 // lw   x28, 0(x0)     # load it back (0x1C)

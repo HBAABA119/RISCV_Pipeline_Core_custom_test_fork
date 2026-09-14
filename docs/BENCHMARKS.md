@@ -35,11 +35,11 @@
 | Workload | Est. IPC | Clock | Perf (IPC×GHz) | vs. big-core ref | Est. power | Perf/W |
 |---|---|---|---|---|---|---|
 | Integer core (Dhrystone-style proxy) | 2.3 | 2800 MHz | 6.45 | 28.7% | 0.43 W | 15 |
-| Math / MAC kernel | 4.08 | 2800 MHz | 11.42 | 50.8% | 0.43 W | 26.7 |
+| Math / MAC kernel | 3.45 | 2800 MHz | 9.66 | 42.9% | 0.43 W | 22.5 |
 | Branch-heavy search/sort proxy | 2.24 | 2800 MHz | 6.28 | 27.9% | 0.43 W | 14.7 |
-| Streaming load/store | 2.84 | 2800 MHz | 7.94 | 35.3% | 0.43 W | 18.5 |
-| Quantized AI inference (NPU offload) | 7.08 | 2800 MHz | 19.83 | 88.1% | 0.43 W | 46.3 |
-| Graphics/blend kernel (GPU helper) | 5.14 | 2800 MHz | 14.4 | 64% | 0.43 W | 33.6 |
+| Streaming load/store | 2.48 | 2800 MHz | 6.94 | 30.8% | 0.43 W | 16.2 |
+| Quantized AI inference (NPU offload) | 6.87 | 2800 MHz | 19.22 | 85.4% | 0.43 W | 44.9 |
+| Graphics/blend kernel (GPU helper) | 4.6 | 2800 MHz | 12.88 | 57.3% | 0.43 W | 30.1 |
 
 > Modern node: high clock and density; enables wide-issue configs.
 

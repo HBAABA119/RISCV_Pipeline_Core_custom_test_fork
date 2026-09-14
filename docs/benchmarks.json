@@ -120,12 +120,12 @@
         "perf_per_watt": 15
       },
       "math_mac": {
-        "ipc": 4.08,
+        "ipc": 3.45,
         "freq_mhz": 2800,
-        "perf": 11.42,
-        "rel_vs_reference_pct": 50.8,
+        "perf": 9.66,
+        "rel_vs_reference_pct": 42.9,
         "est_power_w": 0.43,
-        "perf_per_watt": 26.7
+        "perf_per_watt": 22.5
       },
       "branch_heavy": {
         "ipc": 2.24,
@@ -136,28 +136,28 @@
         "perf_per_watt": 14.7
       },
       "streaming": {
-        "ipc": 2.84,
+        "ipc": 2.48,
         "freq_mhz": 2800,
-        "perf": 7.94,
-        "rel_vs_reference_pct": 35.3,
+        "perf": 6.94,
+        "rel_vs_reference_pct": 30.8,
         "est_power_w": 0.43,
-        "perf_per_watt": 18.5
+        "perf_per_watt": 16.2
       },
       "ai_inference": {
-        "ipc": 7.08,
+        "ipc": 6.87,
         "freq_mhz": 2800,
-        "perf": 19.83,
-        "rel_vs_reference_pct": 88.1,
+        "perf": 19.22,
+        "rel_vs_reference_pct": 85.4,
         "est_power_w": 0.43,
-        "perf_per_watt": 46.3
+        "perf_per_watt": 44.9
       },
       "graphics": {
-        "ipc": 5.14,
+        "ipc": 4.6,
         "freq_mhz": 2800,
-        "perf": 14.4,
-        "rel_vs_reference_pct": 64,
+        "perf": 12.88,
+        "rel_vs_reference_pct": 57.3,
         "est_power_w": 0.43,
-        "perf_per_watt": 33.6
+        "perf_per_watt": 30.1
       }
     }
   }

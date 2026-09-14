@@ -13,14 +13,20 @@ This started as a classic single-issue 5-stage RISC-V teaching pipeline
 
 - **Scalar core** — parameterized in-order pipeline with explicit stage registers,
   full bypass/forwarding (MEM→EX, WB→EX, load-use stalls), separate multiply/divide
-  path, and a real branch-prediction path (2-bit saturating counters + BTB,
-  extendable to gshare/TAGE-style configs).
+  path, and a **mode-parameterized branch predictor**: bimodal (legacy), gshare with
+  folded global history (mainstream), tage-lite with 2× history + larger tables
+  (modern), all with a Return Address Stack (`Branch_Predictor.v`).
+- **Dual-issue dispatch** — real RTL (`Issue_Unit.v`): in-order 2-slot issue with
+  RAW/WAW dependency gating for independent ALU pairs — the 2-issue profile is
+  actual hardware, not a model knob.
 - **Memory hierarchy** — configurable I-cache and D-cache (`Cache_Core.v`) with
   hit/miss tracking, refill interface, and write handling.
-- **Graphics/math helper (iGPU-style)** — transform/blend/tone-map datapath with a
-  command-queue dispatch model and completion path (`Accelerator_Dispatch.v`).
-- **NPU-style MAC array** — matrix/dot-product/tensor MAC block for quantized and
-  FP accumulation workloads, dispatched through the same command interface.
+- **Graphics/math helper (iGPU-style)** — functional 2-cycle pipelined unit
+  (`Graphics_Unit.v`): fixed-point pixel blend, tone-map, 4-lane 8-bit dot product,
+  and small matrix multiply — synthesizable on every node, no FP dependency.
+- **NPU-style MAC array** — 4-lane **signed INT8 MAC** with a 32-bit running
+  accumulator (`NPU_Unit.v`): tensor-MAC accumulation, dot product, read-status,
+  and reset commands — verified round trip in simulation.
 - **Node profiles** — the same RTL family configured for legacy (180 nm-class),
   mainstream (28 nm-class), and modern (5 nm-class) nodes with different issue
   width, cache geometry, predictor capacity, and accelerator inclusion.
@@ -47,10 +53,13 @@ This started as a classic single-issue 5-stage RISC-V teaching pipeline
 | `src/Pipeline_Execute.v` | ALU / branch resolve / forwarding muxes |
 | `src/Pipeline_Memory.v` | D-cache access, load/store path |
 | `src/Pipeline_Writeback.v` | Result mux, register writeback |
-| `src/Branch_Predictor.v` | 2-bit predictor + BTB |
+| `src/Branch_Predictor.v` | Bimodal / gshare / tage-lite predictor + BTB + RAS |
 | `src/Cache_Core.v` | Configurable cache (I/D instantiation) |
 | `src/Multiplier_Divider.v` | Separate MUL/DIV execution path |
-| `src/Accelerator_Dispatch.v` | GPU/NPU command queue + completion |
+| `src/Issue_Unit.v` | Dual-issue dispatch with dependency gating |
+| `src/Graphics_Unit.v` | GPU helper: blend / tone-map / dot / matmul |
+| `src/NPU_Unit.v` | 4-lane INT8 MAC array with accumulator |
+| `src/Accelerator_Dispatch.v` | Command queue + routing + result path |
 | `src/Core_Params.v` | Node-profile configuration knobs |
 | `src/Riscv_Defs.v` | Shared opcodes, opcodes, perf-event constants |
 
@@ -58,10 +67,17 @@ This started as a classic single-issue 5-stage RISC-V teaching pipeline
 
 ![Accelerators](docs/diagrams/accelerators.svg)
 
-The core dispatches accelerator work through a command queue (`Accelerator_Dispatch.v`):
-custom opcodes issue matrix-multiply, dot-product, blend/filter, tone-map, and
-tensor-MAC commands; the accelerators execute with a completion/status path back
-to writeback. This models the "CPU + iGPU + NPU" structure of modern SoCs inside
+The core dispatches accelerator work through a command queue (`Accelerator_Dispatch.v`)
+into two real functional units:
+
+- **Graphics_Unit** (2-cycle pipelined): pixel blend, tone-map, 4-lane dot
+  product, small matmul — all fixed-point, no FP dependency.
+- **NPU_Unit** (1-cycle): 4-lane signed INT8 MAC with a 32-bit accumulator;
+  consecutive TENSOR_MAC commands accumulate, READ_STATUS reads the total.
+
+Results return through a single arbitrated completion channel. **Verified in
+simulation**: MAC accumulate 14 → 114, read-back 114, dot product 20, with per-unit
+perf counters. This models the "CPU + iGPU + NPU" structure of modern SoCs inside
 one machine.
 
 ## Node profiles
@@ -109,6 +125,7 @@ node tools/perf_model.js
 
 - [docs/ARCHITECTURE_DIRECTION.md](docs/ARCHITECTURE_DIRECTION.md) — target machine spec
 - [docs/BENCHMARKS.md](docs/BENCHMARKS.md) — estimated performance tables
+- [docs/FAB_READINESS.md](docs/FAB_READINESS.md) — what's done vs. what remains before tapeout
 
 ## License
 
