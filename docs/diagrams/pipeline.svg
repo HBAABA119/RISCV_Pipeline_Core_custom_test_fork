@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360">
+  <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker></defs>
+  <rect width="960" height="360" fill="#0f172a"/>
+  <text x="480" y="40" text-anchor="middle" font-size="22" fill="#f8fafc" font-weight="600">Pipeline with Forwarding and Prediction</text>
+  <rect x="60" y="90" width="150" height="90" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="135" y="139" text-anchor="middle"
+        font-family="Segoe UI, sans-serif" font-size="12" fill="#e2e8f0">IF
+PC + BTB + RAS
+I-Cache access</text>
+  <line x1="210" y1="135" x2="250" y2="135" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  
+  <rect x="250" y="90" width="150" height="90" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="325" y="139" text-anchor="middle"
+        font-family="Segoe UI, sans-serif" font-size="12" fill="#e2e8f0">ID
+Decode · RegRead
+Hazard check</text>
+  <line x1="400" y1="135" x2="440" y2="135" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  
+  <rect x="440" y="90" width="150" height="90" rx="10" fill="#1e293b" stroke="#4ade80" stroke-width="1.5"/>
+  <text x="515" y="139" text-anchor="middle"
+        font-family="Segoe UI, sans-serif" font-size="12" fill="#e2e8f0">EX
+ALU / MUL / DIV
+Branch resolve</text>
+  <line x1="590" y1="135" x2="630" y2="135" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  
+  <rect x="630" y="90" width="150" height="90" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="705" y="139" text-anchor="middle"
+        font-family="Segoe UI, sans-serif" font-size="12" fill="#e2e8f0">MEM
+D-Cache · LSU
+Write buffer</text>
+  <line x1="780" y1="135" x2="820" y2="135" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  
+  <rect x="820" y="90" width="150" height="90" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="895" y="139" text-anchor="middle"
+        font-family="Segoe UI, sans-serif" font-size="12" fill="#e2e8f0">WB
+Retire · RegWrite
+Perf update</text>
+  <line x1="330" y1="185" x2="200" y2="185" stroke="#f472b6" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="265" y="179" text-anchor="middle" font-size="11" fill="#f472b6">fwd M→E</text>
+  <line x1="470" y1="210" x2="200" y2="215" stroke="#f472b6" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="335" y="206.5" text-anchor="middle" font-size="11" fill="#f472b6">fwd W→E</text>
+  <line x1="360" y1="182" x2="120" y2="60" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="240" y="115" text-anchor="middle" font-size="11" fill="#fb923c">mispredict → flush+redirect</text><text x="360" y="55" font-size="12" fill="#fb923c">resolved at EX (penalty: 1–3 cycles)</text>
+  <rect x="60" y="250" width="840" height="60" rx="10" fill="#1e293b" stroke="#f472b6" stroke-width="1.5"/>
+  <text x="480" y="284.3333333333333" text-anchor="middle"
+        font-family="Segoe UI, sans-serif" font-size="13" fill="#e2e8f0">Branch Predictor feedback: GHR/BTB update at EX · 2-bit counters · Return Address Stack on JAL/JALR</text>
+</svg>

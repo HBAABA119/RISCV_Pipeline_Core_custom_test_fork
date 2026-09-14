@@ -12,6 +12,8 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+`ifndef PC_ADDER_V
+`define PC_ADDER_V
 module PC_Adder (a,b,c);
 
     input [31:0]a,b;
@@ -20,3 +22,4 @@ module PC_Adder (a,b,c);
     assign c = a + b;
     
 endmodule
+`endif

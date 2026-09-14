@@ -20,5 +20,5 @@ module tb();
         $dumpvars(0);
     end
 
-    Pipeline_top dut (.clk(clk), .rst(rst));
+    Pipeline_Top dut (.clk(clk), .rst(rst));
 endmodule

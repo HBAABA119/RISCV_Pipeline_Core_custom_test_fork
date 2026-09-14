@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420">
+  <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker></defs>
+  <rect width="900" height="420" fill="#0f172a"/>
+  <text x="450" y="40" text-anchor="middle" font-size="22" fill="#f8fafc" font-weight="600">Node Profiles and Feature Matrix</text>
+  <rect x="60" y="70" width="200" height="32" fill="#1d4ed8" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="90" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Feature</text>
+  <rect x="260" y="70" width="200" height="32" fill="#1d4ed8" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="90" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Legacy (180nm)</text>
+  <rect x="460" y="70" width="200" height="32" fill="#1d4ed8" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="90" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Mainstream (28nm)</text>
+  <rect x="660" y="70" width="200" height="32" fill="#1d4ed8" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="90" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Modern (5nm)</text>
+  <rect x="60" y="102" width="200" height="32" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="122" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Core config</text>
+  <rect x="260" y="102" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="122" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">RVX-1 Compact</text>
+  <rect x="460" y="102" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="122" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">RVX-2 Balanced</text>
+  <rect x="660" y="102" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="122" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">RVX-4 Performance</text>
+  <rect x="60" y="134" width="200" height="32" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="154" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Issue width</text>
+  <rect x="260" y="134" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="154" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">1</text>
+  <rect x="460" y="134" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="154" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">2</text>
+  <rect x="660" y="134" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="154" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">4</text>
+  <rect x="60" y="166" width="200" height="32" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="186" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Pipeline depth</text>
+  <rect x="260" y="166" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="186" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">5</text>
+  <rect x="460" y="166" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="186" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">6</text>
+  <rect x="660" y="166" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="186" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">7</text>
+  <rect x="60" y="198" width="200" height="32" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="218" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">I/D cache</text>
+  <rect x="260" y="198" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="218" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">4 KB / 4 KB</text>
+  <rect x="460" y="198" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="218" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">16 KB / 16 KB</text>
+  <rect x="660" y="198" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="218" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">64 KB / 64 KB</text>
+  <rect x="60" y="230" width="200" height="32" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="250" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Predictor</text>
+  <rect x="260" y="230" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="250" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">2-bit + BTB32</text>
+  <rect x="460" y="230" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="250" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">Gshare + BTB128 + RAS</text>
+  <rect x="660" y="230" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="250" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">TAGE-lite + BTB1K + RAS</text>
+  <rect x="60" y="262" width="200" height="32" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="282" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">GPU helper</text>
+  <rect x="260" y="262" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="282" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">Yes</text>
+  <rect x="460" y="262" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="282" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">Yes</text>
+  <rect x="660" y="262" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="282" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">Yes</text>
+  <rect x="60" y="294" width="200" height="32" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="314" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">NPU MAC array</text>
+  <rect x="260" y="294" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="314" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">No</text>
+  <rect x="460" y="294" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="314" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">Yes</text>
+  <rect x="660" y="294" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="314" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">Yes</text>
+  <rect x="60" y="326" width="200" height="32" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="346" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Est. clock</text>
+  <rect x="260" y="326" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="346" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">200 MHz</text>
+  <rect x="460" y="326" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="346" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">800 MHz</text>
+  <rect x="660" y="326" width="200" height="32" fill="#0f172a" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="346" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">2.8 GHz</text>
+  <rect x="60" y="358" width="200" height="32" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <text x="70" y="378" font-size="12" fill="#f8fafc" font-family="Segoe UI, sans-serif">Est. power</text>
+  <rect x="260" y="358" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="270" y="378" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">~0.4 W</text>
+  <rect x="460" y="358" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="470" y="378" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">~1.2 W</text>
+  <rect x="660" y="358" width="200" height="32" fill="#111827" stroke="#334155" stroke-width="0.5"/>
+  <text x="670" y="378" font-size="12" fill="#cbd5e1" font-family="Segoe UI, sans-serif">~8 W (est.)</text>
+</svg>

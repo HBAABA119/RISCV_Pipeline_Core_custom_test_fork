@@ -12,6 +12,8 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+`ifndef MAIN_DECODER_V
+`define MAIN_DECODER_V
 module Main_Decoder(Op,RegWrite,ImmSrc,ALUSrc,MemWrite,ResultSrc,Branch,ALUOp);
     input [6:0]Op;
     output RegWrite,ALUSrc,MemWrite,ResultSrc,Branch;
@@ -35,3 +37,4 @@ module Main_Decoder(Op,RegWrite,ImmSrc,ALUSrc,MemWrite,ResultSrc,Branch,ALUOp);
                                         2'b00 ;
 
 endmodule
+`endif

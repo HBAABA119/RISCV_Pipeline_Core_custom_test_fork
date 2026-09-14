@@ -12,6 +12,8 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+`ifndef CONTROL_UNIT_TOP_V
+`define CONTROL_UNIT_TOP_V
 `include "ALU_Decoder.v"
 `include "Main_Decoder.v"
 
@@ -46,3 +48,4 @@ module Control_Unit_Top(Op,RegWrite,ImmSrc,ALUSrc,MemWrite,ResultSrc,Branch,func
 
 
 endmodule
+`endif

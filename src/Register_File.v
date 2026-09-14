@@ -12,6 +12,8 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+`ifndef REGISTER_FILE_V
+`define REGISTER_FILE_V
 module Register_File(clk,rst,WE3,WD3,A1,A2,A3,RD1,RD2);
 
     input clk,rst,WE3;
@@ -35,3 +37,4 @@ module Register_File(clk,rst,WE3,WD3,A1,A2,A3,RD1,RD2);
     end
 
 endmodule
+`endif

@@ -12,6 +12,8 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+`ifndef PC_V
+`define PC_V
 module PC_Module(clk,rst,PC,PC_Next);
     input clk,rst;
     input [31:0]PC_Next;
@@ -26,3 +28,4 @@ module PC_Module(clk,rst,PC,PC_Next);
             PC <= PC_Next;
     end
 endmodule
+`endif

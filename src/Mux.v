@@ -12,6 +12,8 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+`ifndef MUX_V
+`define MUX_V
 module Mux (a,b,s,c);
 
     input [31:0]a,b;
@@ -30,3 +32,4 @@ module Mux_3_by_1 (a,b,c,s,d);
     assign d = (s == 2'b00) ? a : (s == 2'b01) ? b : (s == 2'b10) ? c : 32'h00000000;
     
 endmodule
+`endif

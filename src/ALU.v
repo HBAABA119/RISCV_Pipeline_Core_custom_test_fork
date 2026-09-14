@@ -12,6 +12,8 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+`ifndef ALU_V
+`define ALU_V
 module ALU(A,B,Result,ALUControl,OverFlow,Carry,Zero,Negative);
 
     input [31:0]A,B;
@@ -38,3 +40,4 @@ module ALU(A,B,Result,ALUControl,OverFlow,Carry,Zero,Negative);
     assign Negative = Result[31];
 
 endmodule
+`endif
